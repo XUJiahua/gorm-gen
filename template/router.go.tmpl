@@ -39,7 +39,7 @@ type PagedResults struct {
 	Page         int64       {{ .Config.JSONTag "page" }}
 	PageSize     int64       {{ .Config.JSONTag "page_size" }}
 	Data         interface{} {{ .Config.JSONTag "data" }}
-    TotalRecords int         {{ .Config.JSONTag "total_records" }}
+    TotalRecords int64       {{ .Config.JSONTag "total_records" }}
 }
 
 // HTTPError example
