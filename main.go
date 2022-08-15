@@ -685,6 +685,7 @@ func generate(conf *dbmeta.Config) error {
 	if *runGoFmt {
 		GoFmt(conf.OutDir)
 		GoImports(conf.OutDir)
+		GoModTidy(conf.OutDir)
 	}
 
 	return nil
@@ -867,14 +868,7 @@ func CompileProtoC(protoBufDir, protoBufOutDir, protoBufFile string) (string, er
 	return string(stdoutStderr), nil
 }
 
-// GoFmt exec gofmt for a code dir
-func GoFmt(codeDir string) (string, error) {
-	args := []string{"-s", "-d", "-w", "-l", codeDir}
-	cmd := exec.Command("gofmt", args...)
-
-	cmdLineArgs := strings.Join(args, " ")
-	fmt.Printf("gofmt %s\n", cmdLineArgs)
-
+func runCMD(cmd *exec.Cmd) (string, error) {
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Print(au.Red(fmt.Sprintf("error calling protoc: %T %v\n", err, err)))
@@ -885,6 +879,17 @@ func GoFmt(codeDir string) (string, error) {
 	return string(stdoutStderr), nil
 }
 
+// GoFmt exec gofmt for a code dir
+func GoFmt(codeDir string) (string, error) {
+	args := []string{"-s", "-d", "-w", "-l", codeDir}
+	cmd := exec.Command("gofmt", args...)
+
+	cmdLineArgs := strings.Join(args, " ")
+	fmt.Printf("gofmt %s\n", cmdLineArgs)
+
+	return runCMD(cmd)
+}
+
 func GoImports(codeDir string) (string, error) {
 	args := []string{"-w", codeDir}
 	cmd := exec.Command("goimports", args...)
@@ -892,14 +897,18 @@ func GoImports(codeDir string) (string, error) {
 	cmdLineArgs := strings.Join(args, " ")
 	fmt.Printf("goimports %s\n", cmdLineArgs)
 
-	stdoutStderr, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Print(au.Red(fmt.Sprintf("error calling protoc: %T %v\n", err, err)))
-		fmt.Print(au.Red(fmt.Sprintf("%s\n", stdoutStderr)))
-		return "", err
-	}
+	return runCMD(cmd)
+}
 
-	return string(stdoutStderr), nil
+func GoModTidy(codeDir string) (string, error) {
+	args := []string{"mod", "tidy"}
+	cmd := exec.Command("go", args...)
+	cmd.Dir = codeDir
+
+	cmdLineArgs := strings.Join(args, " ")
+	fmt.Printf("go %s\n", cmdLineArgs)
+
+	return runCMD(cmd)
 }
 
 func generateProjectFiles(conf *dbmeta.Config, data map[string]interface{}) (err error) {
