@@ -684,6 +684,7 @@ func generate(conf *dbmeta.Config) error {
 
 	if *runGoFmt {
 		GoFmt(conf.OutDir)
+		GoImports(conf.OutDir)
 	}
 
 	return nil
@@ -873,6 +874,23 @@ func GoFmt(codeDir string) (string, error) {
 
 	cmdLineArgs := strings.Join(args, " ")
 	fmt.Printf("gofmt %s\n", cmdLineArgs)
+
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Print(au.Red(fmt.Sprintf("error calling protoc: %T %v\n", err, err)))
+		fmt.Print(au.Red(fmt.Sprintf("%s\n", stdoutStderr)))
+		return "", err
+	}
+
+	return string(stdoutStderr), nil
+}
+
+func GoImports(codeDir string) (string, error) {
+	args := []string{"-w", codeDir}
+	cmd := exec.Command("goimports", args...)
+
+	cmdLineArgs := strings.Join(args, " ")
+	fmt.Printf("goimports %s\n", cmdLineArgs)
 
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
