@@ -98,7 +98,7 @@ func main() {
 		log.Fatalf("Got error when connect database, the error is '%v'", err)
 	}
 
-	db.LogMode(true)
+{{/*	db.LogMode(true)*/}}
 	{{.daoPackageName}}.DB = db
 
     {{ $modelPackage := .modelPackageName }}
