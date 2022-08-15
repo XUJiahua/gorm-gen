@@ -269,7 +269,7 @@ func parseUUID(ps httprouter.Params, key string) (string, error) {
 	return idStr, nil
 }
 
-func parseBytes(ps httprouter.Params, key string) (string, error) {
+func parseBytes(ps httprouter.Params, key string) ([]byte, error) {
 	idStr := ps.ByName(key)
 	return hex.DecodeString(idStr)
 }
