@@ -93,6 +93,7 @@ generate_example: clean_example ## generate example project code from sqlite db 
 		--server \
 		--makefile \
 		--run-gofmt \
+		-v \
 		--copy-templates
 
 test_exec: clean_example ## test example using sqlite db in ./examples

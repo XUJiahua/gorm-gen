@@ -124,8 +124,9 @@ func saveTemplates() {
 }
 
 func listTemplates() {
+	logrus.Info("list templates ...")
 	i := 0
-	err := fs.WalkDir(BaseTemplates, "./", func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(BaseTemplates, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -1117,7 +1118,7 @@ func SaveAssets(outputDir string) error {
 		outputDir = "."
 	}
 
-	return fs.WalkDir(BaseTemplates, "./", func(path string, d fs.DirEntry, err error) error {
+	return fs.WalkDir(BaseTemplates, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
