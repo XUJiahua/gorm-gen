@@ -76,7 +76,7 @@ $ gen --sqltype=sqlite3 \
    	--generate-proj \
    	--overwrite
 
-## build example code (build process will install packr2 if not installed)
+## build example code
 $ cd ./example
 $ make example
 
@@ -211,8 +211,6 @@ The REST api server utilizes the Gin framework, GORM db api and Swag for providi
 * [Gin](https://github.com/gin-gonic/gin)
 * [Swaggo](https://github.com/swaggo/swag)
 * [Gorm](https://github.com/jinzhu/gorm)
-* [packr2](https://github.com/gobuffalo/packr)
-
 
 
 ## Supported Databases

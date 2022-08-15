@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
+	"github.com/smallnest/gen/template"
 	"go/build"
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -15,8 +18,6 @@ import (
 
 	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/droundy/goopt"
-	"github.com/gobuffalo/packd"
-	"github.com/gobuffalo/packr/v2"
 	"github.com/jimsmart/schema"
 	_ "github.com/lib/pq"
 	"github.com/logrusorgru/aurora"
@@ -92,10 +93,11 @@ var (
 
 	nameTest = goopt.String([]string{"--name_test"}, "", "perform name test using the --model_naming or --file_naming options")
 
-	baseTemplates *packr.Box
-	tableInfos    map[string]*dbmeta.ModelInfo
-	au            aurora.Aurora
+	tableInfos map[string]*dbmeta.ModelInfo
+	au         aurora.Aurora
 )
+
+var BaseTemplates = template.BaseTemplates
 
 func init() {
 	// Setup goopts
@@ -115,15 +117,27 @@ git fetch up
 
 func saveTemplates() {
 	fmt.Printf("Saving templates to %s\n", *saveTemplateDir)
-	err := SaveAssets(*saveTemplateDir, baseTemplates)
+	err := SaveAssets(*saveTemplateDir)
 	if err != nil {
 		fmt.Printf("Error saving: %v\n", err)
 	}
 }
 
 func listTemplates() {
-	for i, file := range baseTemplates.List() {
-		fmt.Printf("   [%d] [%s]\n", i, file)
+	i := 0
+	err := fs.WalkDir(BaseTemplates, "./", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		fmt.Printf("   [%d] [%s]\n", i, path)
+		i++
+		return nil
+	})
+	if err != nil {
+		logrus.Error(err)
 	}
 }
 
@@ -154,8 +168,6 @@ func main() {
 	//}
 	au = aurora.NewAurora(!*noColorOutput)
 	dbmeta.InitColorOutput(au)
-
-	baseTemplates = packr.New("gen", "./template")
 
 	if *saveTemplateDir != "" {
 		saveTemplates()
@@ -408,7 +420,7 @@ func initialize(conf *dbmeta.Config) {
 func loadDefaultDBMappings(conf *dbmeta.Config) error {
 	var err error
 	var content []byte
-	content, err = baseTemplates.Find("mapping.json")
+	content, err = BaseTemplates.ReadFile("mapping.json")
 	if err != nil {
 		return err
 	}
@@ -991,7 +1003,7 @@ func copyTemplatesToTarget() (err error) {
 	}
 
 	fmt.Printf("Saving templates to %s\n", templatesDir)
-	err = SaveAssets(templatesDir, baseTemplates)
+	err = SaveAssets(templatesDir)
 	if err != nil {
 		fmt.Print(au.Red(fmt.Sprintf("Error saving: %v\n", err)))
 	}
@@ -1091,7 +1103,7 @@ func regenCmdLine() []string {
 }
 
 // SaveAssets will save the prepacked templates for local editing. File structure will be recreated under the output dir.
-func SaveAssets(outputDir string, box *packr.Box) error {
+func SaveAssets(outputDir string) error {
 	fmt.Printf("SaveAssets: %v\n", outputDir)
 	if outputDir == "" {
 		outputDir = "."
@@ -1105,23 +1117,30 @@ func SaveAssets(outputDir string, box *packr.Box) error {
 		outputDir = "."
 	}
 
-	_ = box.Walk(func(s string, file packd.File) error {
-		fileName := fmt.Sprintf("%s/%s", outputDir, s)
-
-		fi, err := file.FileInfo()
-		if err == nil {
-			if !fi.IsDir() {
-
-				err := WriteNewFile(fileName, file)
-				if err != nil {
-					return err
-				}
-			}
+	return fs.WalkDir(BaseTemplates, "./", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
 		}
+		if d.IsDir() {
+			return nil
+		}
+
+		logrus.Info(path)
+
+		data, err := BaseTemplates.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		fileName := fmt.Sprintf("%s/%s", outputDir, path)
+		logrus.Info(fileName)
+		err = WriteNewFile(fileName, bytes.NewReader(data))
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
-
-	return nil
 }
 
 // WriteNewFile will attempt to write a file with the filename and path, a Reader and the FileMode of the file to be created.
@@ -1182,13 +1201,14 @@ func LoadTemplate(filename string) (tpl *dbmeta.GenTemplate, err error) {
 		}
 	}
 
-	content, err := baseTemplates.FindString(baseName)
+	data, err := BaseTemplates.ReadFile(baseName)
 	if err != nil {
 		return nil, fmt.Errorf("%s not found internally", baseName)
 	}
 	if *verbose {
 		fmt.Printf("Loaded template from app: %s\n", filename)
 	}
+	content := string(data)
 
 	tpl = &dbmeta.GenTemplate{Name: "internal://" + filename, Content: content}
 	return tpl, nil

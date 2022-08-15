@@ -1,5 +1,4 @@
 WORKDIR=`pwd`
-export PACKR2_EXECUTABLE := $(shell command -v packr2  2> /dev/null)
 
 ####################################################################################################################
 ##
@@ -14,14 +13,10 @@ help: ## This help.
 .DEFAULT_GOAL := help
 
 check_prereq: ## check pre requisites exist
-ifndef PACKR2_EXECUTABLE
-	go get -u github.com/gobuffalo/packr/v2/packr2
-endif
-	$(warning "found packr2")
 
 
 install: check_prereq ## go install binary info $GOPATH/bin
-	packr2 install github.com/smallnest/gen
+	go install ./
 
 vet: ## run go vet on the project
 	go vet .
@@ -36,7 +31,6 @@ tools: ## install dependent tools
 	go get -u github.com/gordonklaus/ineffassign
 	go get -u github.com/fzipp/gocyclo
 	go get -u golang.org/x/lint/golint
-	go get -u github.com/gobuffalo/packr/v2/packr2
 
 lint: ## run golint on the project
 	golint ./...
@@ -63,7 +57,7 @@ fmt: ## run fmt on the project
 	gofmt -s -d -w -l .
 
 build: check_prereq ## build gen binary
-	packr2 build .
+	go build .
 
 gen: build ## build gen binary
 

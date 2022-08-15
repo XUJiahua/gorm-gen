@@ -3,10 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/smallnest/gen/template"
 	"strings"
 
 	"github.com/droundy/goopt"
-	"github.com/gobuffalo/packr/v2"
 	"github.com/jimsmart/schema"
 
 	_ "github.com/denisenkom/go-mssqldb"
@@ -22,7 +22,7 @@ var (
 	sqlConnStr    = goopt.String([]string{"-c", "--connstr"}, "nil", "database connection string")
 	sqlDatabase   = goopt.String([]string{"-d", "--database"}, "nil", "Database to for connection")
 	sqlTable      = goopt.String([]string{"-t", "--table"}, "", "Table to build struct from")
-	baseTemplates *packr.Box
+	baseTemplates = template.BaseTemplates
 )
 
 func init() {
@@ -43,11 +43,9 @@ func init() {
 }
 
 func main() {
-	baseTemplates = packr.New("gen", "./template")
-
 	var err error
 	var content []byte
-	content, err = baseTemplates.Find("mapping.json")
+	content, err = baseTemplates.ReadFile("mapping.json")
 	if err != nil {
 		fmt.Printf("Error getting default map[mapping file error: %v\n", err)
 		return
