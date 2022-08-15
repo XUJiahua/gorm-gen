@@ -11,7 +11,6 @@ require (
 	github.com/gobuffalo/packr/v2 v2.8.1
 	github.com/iancoleman/strcase v0.1.2
 	github.com/jimsmart/schema v0.2.0
-	github.com/jinzhu/gorm v1.9.16
 	github.com/jinzhu/inflection v1.0.0
 	github.com/karrick/godirwalk v1.16.1 // indirect
 	github.com/lib/pq v1.10.0
@@ -23,4 +22,5 @@ require (
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	golang.org/x/crypto v0.0.0-20201012173705-84dcc777aaee // indirect
 	golang.org/x/tools v0.0.0-20201224043029-2b0845dc783e
+	gorm.io/driver/mysql v1.3.5
 )

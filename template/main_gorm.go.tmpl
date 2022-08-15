@@ -8,13 +8,13 @@ import (
 	"os/signal"
 	"syscall"
 
-    _ "github.com/jinzhu/gorm/dialects/mysql"
-    _ "github.com/jinzhu/gorm/dialects/sqlite"
-    _ "github.com/jinzhu/gorm/dialects/postgres"
-    _ "github.com/jinzhu/gorm/dialects/mssql"
+    _ "gorm.io/driver/mysql"
+    _ "gorm.io/driver/sqlite"
+    _ "gorm.io/driver/postgres"
+    _ "gorm.io/driver/sqlserver"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"github.com/swaggo/files"       // swagger embed files
 	"github.com/swaggo/gin-swagger" // gin-swagger middleware
 	"github.com/droundy/goopt"
