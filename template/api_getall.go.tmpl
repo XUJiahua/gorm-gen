@@ -34,7 +34,7 @@ func GetAll{{.StructName}}(w http.ResponseWriter, r *http.Request, ps httprouter
 		return
 	}
 
-    records, totalRows, err :=  {{.daoPackageName}}.GetAll{{.StructName}}(ctx, page, pagesize, order)
+    records, totalRows, err :=  {{.daoPackageName}}.GetAll{{.StructName}}(ctx, int(page), int(pagesize), order)
 	if err != nil {
 	    returnError(ctx, w, r, err)
 		return
