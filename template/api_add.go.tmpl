@@ -21,9 +21,9 @@ func Add{{.StructName}}(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 	}
 
 
-   if err := {{.StructName | toLower}}.BeforeSave(); err != nil {
-      returnError(ctx, w, r, {{.daoPackageName}}.ErrBadParams)
-   }
+{{/*   if err := {{.StructName | toLower}}.BeforeSave(); err != nil {*/}}
+{{/*      returnError(ctx, w, r, {{.daoPackageName}}.ErrBadParams)*/}}
+{{/*   }*/}}
 
    {{.StructName | toLower}}.Prepare()
 
